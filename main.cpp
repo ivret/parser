@@ -9,82 +9,6 @@
 #define NOMINMAX
 #include <windows.h>
 
-void parserVar2(Tree234<string>& func,Tree234<string>&
-    variables,std::vector<std::string>& tokens,int& i) {
-    if (i -1 > 1) {
-        throw std::runtime_error("много переменных, должна быть 1");
-    }
-    if (!isVariable(tokens[1]) || variables.search(tokens[1])) {
-        throw std::runtime_error("переменная уже существует или не правильное имя");
-    }
-    variables.insert(tokens[1]);
-    if (!isVariable(tokens[1])) {
-        throw std::runtime_error("не правильное имя переменной");
-    }
-    i+=2;
-    parseExpression1(variables, i,tokens,func);
-
-}
-void parserVar(Tree234<string>& func,Tree234<string>&
-    variables,std::vector<std::string>& tokens) {
-    std::vector<std::string> types = {"real"};
-    int i = 1;
-    while (tokens[i-1] != ":") {
-        if (tokens.size() > i +1 && tokens[i] == ":" && tokens[i +1] != "=") {
-            parserVar1(variables,tokens,types,i);
-        }if (tokens.size() > i +1 && tokens[i] == ":" && tokens[i +1] == "=") {
-            parserVar2(func,variables,tokens,i);
-            break;
-        }
-        i++;
-    }
-}
-
-void parserConst(Tree234<string>& func,Tree234<string>&
-    variables,std::vector<std::string>& tokens) {
-    if (!isVariable(tokens[1])) {
-        throw std::runtime_error("не правильное имя переменной");
-    }
-    variables.insert(tokens[1]);
-    if (tokens[2] != "=") {
-        throw std::runtime_error("нет =");
-    }
-    if (!isNumber(tokens[3])){
-        throw std::runtime_error("нет такой переменной или числа");
-    }
-    if (tokens[4] != ";") {
-        throw std::runtime_error("нет ;");
-    }
-}
-void parser(Tree234<string>& func,Tree234<string>&
-    variables,std::vector<std::string>& tokens) {
-
-    if (tokens[0] != "begin" && !tokens.size() && tokens[0] != "end") {
-        throw std::runtime_error("нет такой переменной");
-    }
-    if (tokens[0] == "begin" || tokens[0] == "end.") {return;}
-    bool is_func = func.search(tokens[0]);
-    if (!is_func) {
-        throw std::runtime_error("нет функции с таким названием");
-    }
-
-    if (tokens[0] == "write") {
-        parserWrite(tokens);
-    }
-    if (tokens[0] == "readln") {
-        parserReadln(tokens,variables);
-    }
-    if (tokens[0] == "var") {
-        parserVar(func,variables,tokens);
-    }
-    if (tokens[0] == "assert") {
-        parserAssert(tokens,variables,func);
-    }
-    if (tokens[0] == "const") {
-        parserConst(func,variables,tokens);
-    }
-}
-
 std::vector<std::string> getToken(std::string& line) {
     std::string current = "";
     int count = 0;
@@ -131,9 +55,15 @@ int main() {
     std::string line;
     int i = 0;
     while (std::getline(ifs, line)) {
-        std::vector<std::string> tokens = getToken(line);
-        parser(funcs,variables,tokens);
-        std::cout << i++ << "\n";
+        try {
+            std::vector<std::string> tokens = getToken(line);
+            parser(funcs,variables,tokens);
+            std::cout << i++ << "\n";
+        }
+        catch (const std::exception& e) {
+            std::cerr << "ошибка в строке " << i << ": " << e.what() << std::endl;
+        }
+
     }
 
 

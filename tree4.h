@@ -1,5 +1,3 @@
-
-
 #ifndef OOP8_TREE4_H
 #define OOP8_TREE4_H
 #include <iostream>
@@ -22,7 +20,6 @@ public:
         return keyCount == 3;
     }
 
-    // Вставка в лист (с сортировкой)
     void insertIntoLeaf(T key) {
         int i = keyCount - 1;
 
@@ -35,35 +32,28 @@ public:
         keyCount++;
     }
 
-    // Расщепление полного потомка
     void splitChild(int i) {
         Node<T>* child = children[i];
         Node<T>* newNode = new Node<T>(child->leaf);
 
-        // Средний ключ поднимается вверх
         T middle = child->keys[1];
 
-        // Новый узел получает правый ключ
         newNode->keys[0] = child->keys[2];
         newNode->keyCount = 1;
 
-        // Старый узел оставляет левый ключ
         child->keyCount = 1;
 
-        // Если не лист — переносим детей
         if (!child->leaf) {
             newNode->children[0] = child->children[2];
             newNode->children[1] = child->children[3];
         }
 
-        // Сдвиг детей
         for (int j = keyCount; j >= i + 1; j--) {
             children[j + 1] = children[j];
         }
 
         children[i + 1] = newNode;
 
-        // Сдвиг ключей
         for (int j = keyCount - 1; j >= i; j--) {
             keys[j + 1] = keys[j];
         }
@@ -72,7 +62,6 @@ public:
         keyCount++;
     }
 
-    // Вставка в неполный узел
     void insertNonFull(T key) {
         int i = keyCount - 1;
 
@@ -81,13 +70,11 @@ public:
             return;
         }
 
-        // Ищем нужного ребенка
         while (i >= 0 && key < keys[i]) {
             i--;
         }
         i++;
 
-        // Если ребенок полный — сначала делим
         if (children[i]->isFull()) {
             splitChild(i);
 
@@ -98,18 +85,16 @@ public:
 
         children[i]->insertNonFull(key);
     }
+
     void print(int level = 0) {
-        // Отступ (уровень дерева)
         for (int i = 0; i < level; i++) cout << "    ";
 
-        // Печать ключей узла
         cout << "[ ";
         for (int i = 0; i < keyCount; i++) {
             cout << keys[i] << " ";
         }
         cout << "]\n";
 
-        // Рекурсивно печатаем детей
         if (!leaf) {
             for (int i = 0; i <= keyCount; i++) {
                 if (children[i])
@@ -117,25 +102,22 @@ public:
             }
         }
     }
+
     bool search(const T& key) {
         int i = 0;
 
-        // Ищем первый ключ >= key
         while (i < keyCount && key > keys[i]) {
             i++;
         }
 
-        // Если нашли точное совпадение
         if (i < keyCount && keys[i] == key) {
             return true;
         }
 
-        // Если это лист — дальше идти некуда
         if (leaf) {
             return false;
         }
 
-        // Идём к нужному ребёнку
         return children[i]->search(key);
     }
 };
@@ -161,15 +143,16 @@ public:
 
         root->insertNonFull(key);
     }
+
     void print() {
         if (root)
             root->print();
     }
+
     bool search(const T& key) {
         if (!root) return false;
         return root->search(key);
     }
 };
-
 
 #endif //OOP8_TREE4_H
